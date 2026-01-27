@@ -1,6 +1,6 @@
 "use client";
 
-import type { ChatRequest } from "@/app/api/chat/route";
+import { ChatRequest } from "@/common/chat.common";
 
 export type Chat = (arg0: Partial<ChatRequest>) => Promise<string>;
 

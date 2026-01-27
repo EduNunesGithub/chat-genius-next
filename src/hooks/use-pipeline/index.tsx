@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { roles } from "@/app/api/chat/route";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
+import { roles } from "@/common/chat.common";
 
 export type PipelinePlugin = (
   ctx: PipelineSchema,
@@ -35,7 +35,14 @@ export const usePipeline = ({
   const generatedId = React.useId();
   const queryClient = useQueryClient();
   const queryKey = queryKeyProp ?? ["pipeline", generatedId];
-  const context = queryClient.getQueryData<PipelineSchema>(queryKey) ?? ctx;
+
+  const { data: context } = useQuery({
+    gcTime: Infinity,
+    initialData: ctx,
+    queryFn: () => ctx,
+    queryKey,
+    staleTime: Infinity,
+  });
 
   const mutation = useMutation({
     mutationFn: async (partial: Partial<PipelineSchema>) => {
@@ -43,10 +50,10 @@ export const usePipeline = ({
         ...context,
         ...partial,
       });
+      const current: { data: PipelineSchema } = { data: merged };
 
       const updateCtx = (next: PipelineSchema) =>
         queryClient.setQueryData(queryKey, next);
-      const current: { data: PipelineSchema } = { data: merged };
 
       for (const plugin of plugins) {
         current.data = await plugin(current.data, updateCtx);

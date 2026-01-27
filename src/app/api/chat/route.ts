@@ -1,25 +1,10 @@
+"use server";
+
 import { NextRequest, NextResponse } from "next/server";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { z } from "zod";
 import { openai } from "@/lib/adapters/openai.server";
-
-export const roles = ["assistant", "system", "user"] as const;
-
-export const chatSchema = z.object({
-  messages: z
-    .array(
-      z.object({
-        content: z.string().min(1).max(10240),
-        role: z.enum(roles),
-      }),
-    )
-    .min(0)
-    .max(100),
-  model: z.enum(["deepseek-chat", "deepseek-coder"]).default("deepseek-chat"),
-  stream: z.boolean().default(false),
-});
-
-export type ChatRequest = z.infer<typeof chatSchema>;
+import { ChatRequest, chatSchema } from "@/common/chat.common";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {

@@ -1,3 +1,4 @@
+import { flushSync } from "react-dom";
 import { chatStream } from "@/client/api/chat.client";
 import type { PipelinePlugin, PipelineSchema } from "@/hooks/use-pipeline";
 
