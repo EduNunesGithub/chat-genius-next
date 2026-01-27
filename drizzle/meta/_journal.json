@@ -8,6 +8,13 @@
       "when": 1769535608156,
       "tag": "0000_dizzy_meteorite",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1769537479374,
+      "tag": "0001_flippant_scorpion",
+      "breakpoints": true
     }
   ]
 }
