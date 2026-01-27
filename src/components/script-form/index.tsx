@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { insertScript } from "@/server/api/script.server";
 
 export type FormSchema = z.infer<typeof schema>;
 
@@ -39,7 +40,7 @@ const schema = z.object({
 export const ScriptForm = () => {
   const id = React.useId();
 
-  const { control, register } = useForm<FormSchema>({
+  const { control, handleSubmit, register } = useForm<FormSchema>({
     defaultValues: {
       action: "Adicionar",
       description: "",
@@ -50,8 +51,18 @@ export const ScriptForm = () => {
     resolver: zodResolver(schema),
   });
 
+  const onSubmit = async (data: FormSchema) => {
+    const script = await insertScript({
+      ...data,
+      embedding: Array.from({ length: 768 }, () => 0),
+      technical_metadata: "",
+    });
+
+    console.log(script);
+  };
+
   return (
-    <Card className="py-4">
+    <Card className="py-4" onSubmit={handleSubmit(onSubmit)}>
       <CardContent className="px-4">
         <form className="flex flex-col gap-4 w-full">
           <FieldSet className="flex flex-col gap-4 w-full">
