@@ -17,7 +17,7 @@ export const scriptsTable = pgTable("scripts", {
   created_at: timestamp({ withTimezone: true }).defaultNow().notNull(),
   description: text().notNull(),
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  embedding: vector({ dimensions: 768 }).notNull(),
+  embedding: vector({ dimensions: 1536 }).notNull(),
   name: varchar({ length: 128 }).notNull(),
   layout: varchar({ length: 64 }).notNull(),
   technical_metadata: text().notNull(),

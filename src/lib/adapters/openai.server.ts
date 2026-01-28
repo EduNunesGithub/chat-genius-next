@@ -1,6 +1,5 @@
 import OpenAI from "openai";
 
 export const openai = new OpenAI({
-  apiKey: process.env.DEEPSEEK_API_KEY,
-  baseURL: "https://api.deepseek.com/v1",
+  apiKey: process.env.OPENAI_API_KEY,
 });

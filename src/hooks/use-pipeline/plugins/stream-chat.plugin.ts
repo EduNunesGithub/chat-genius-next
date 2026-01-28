@@ -29,7 +29,7 @@ export const streamChat: PipelinePlugin = async (ctx, updateCtx) => {
     await chatStream(
       {
         messages: ctx.messages,
-        model: "deepseek-chat",
+        model: "gpt-4o-mini",
         stream: true,
       },
       (token) => {

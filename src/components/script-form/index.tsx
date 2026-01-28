@@ -18,6 +18,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { usePipeline } from "@/hooks/use-pipeline";
+import { prepareEmbeddingText } from "@/hooks/use-pipeline/plugins/prepare-embedding-text.plugin";
+import { generateEmbeddings } from "@/hooks/use-pipeline/plugins/generate-embeddings.plugin";
 import { insertScript } from "@/server/api/script.server";
 
 export type FormSchema = z.infer<typeof schema>;
@@ -29,7 +32,7 @@ const layouts = [
   "Workspace",
 ] as const;
 
-const schema = z.object({
+export const schema = z.object({
   action: z.enum(actions).nonoptional(),
   description: z.string().min(1).max(3072),
   name: z.string().min(1).max(128),
@@ -51,14 +54,33 @@ export const ScriptForm = () => {
     resolver: zodResolver(schema),
   });
 
-  const onSubmit = async (data: FormSchema) => {
-    const script = await insertScript({
-      ...data,
-      embedding: Array.from({ length: 768 }, () => 0),
-      technical_metadata: "",
-    });
+  const { context, run } = usePipeline({
+    ctx: {
+      messages: [],
+      status: "idle",
+    },
+    plugins: [prepareEmbeddingText, generateEmbeddings],
+  });
 
-    console.log(script);
+  const onSubmit = async (data: FormSchema) => {
+    // const script = await insertScript({
+    //   ...data,
+    //   embedding: Array.from({ length: 768 }, () => 0),
+    //   technical_metadata: "",
+    // });
+
+    const embeddingText = `${data.name} - ${data.action} - ${data.layout} - ${data.description}`;
+
+    const result = await run({ embeddingText });
+
+    if (result.status === "error") {
+      console.error("Pipeline error:", result.error);
+      return;
+    }
+
+    console.log(result);
+
+    // console.log(script);
   };
 
   return (

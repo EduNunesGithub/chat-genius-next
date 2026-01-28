@@ -49,7 +49,7 @@
   "scripts": {
     "build": "next build",
     "commit": "cz",
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "lint": "eslint",
     "start": "next start",
     "prepare": "husky"

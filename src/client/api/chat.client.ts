@@ -12,7 +12,7 @@ export type ChatStream = (
 export const chat: Chat = async (data) => {
   const body: ChatRequest = {
     messages: [],
-    model: "deepseek-chat",
+    model: "gpt-4-turbo",
     stream: false,
     ...data,
   };
@@ -32,7 +32,7 @@ export const chat: Chat = async (data) => {
 export const chatStream: ChatStream = async (data, onToken) => {
   const body: ChatRequest = {
     messages: [],
-    model: "deepseek-chat",
+    model: "gpt-4-turbo",
     stream: true,
     ...data,
   };

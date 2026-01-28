@@ -14,6 +14,15 @@ export const chatSchema = z.object({
     )
     .min(0)
     .max(100),
-  model: z.enum(["deepseek-chat", "deepseek-coder"]).default("deepseek-chat"),
+  model: z
+    .enum([
+      "deepseek-chat",
+      "deepseek-coder",
+      "gpt-4o",
+      "gpt-4o-mini",
+      "gpt-4-turbo",
+      "gpt-3.5-turbo",
+    ])
+    .default("deepseek-chat"),
   stream: z.boolean().default(false),
 });

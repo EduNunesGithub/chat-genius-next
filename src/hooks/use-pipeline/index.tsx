@@ -19,6 +19,8 @@ export type UsePipelineParams = {
 };
 
 export const pipelineSchema = z.object({
+  embedding: z.array(z.number()).optional(),
+  embeddingText: z.string().optional(),
   error: z.string().optional(),
   messages: z
     .array(z.object({ content: z.string(), role: z.enum(roles) }))
