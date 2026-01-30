@@ -8,7 +8,7 @@ export const chatSchema = z.object({
   messages: z
     .array(
       z.object({
-        content: z.string().min(1).max(10240),
+        content: z.string().min(1).max(409600),
         role: z.enum(roles),
       }),
     )

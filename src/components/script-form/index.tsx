@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { SendHorizonal } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import * as z from "zod";
+import { fetchScriptContent } from "@/server/api/script-fetcher.server";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Field, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
@@ -19,8 +20,11 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { usePipeline } from "@/hooks/use-pipeline";
-import { prepareEmbeddingText } from "@/hooks/use-pipeline/plugins/prepare-embedding-text.plugin";
 import { generateEmbeddings } from "@/hooks/use-pipeline/plugins/generate-embeddings.plugin";
+import { noStreamChat } from "@/hooks/use-pipeline/plugins/no-stream-chat.plugin";
+import { prepareEmbeddingText } from "@/hooks/use-pipeline/plugins/prepare-embedding-text.plugin";
+import { submitUserMessage } from "@/hooks/use-pipeline/plugins/submit-user-message.plugin";
+import technicalMetadataPrompt from "@/prompts/technical-metadata.prompt.md";
 import { insertScript } from "@/server/api/script.server";
 
 export type FormSchema = z.infer<typeof schema>;
@@ -56,10 +60,20 @@ export const ScriptForm = () => {
 
   const { context, run } = usePipeline({
     ctx: {
-      messages: [],
+      messages: [
+        {
+          content: technicalMetadataPrompt,
+          role: "system",
+        },
+      ],
       status: "idle",
     },
-    plugins: [prepareEmbeddingText, generateEmbeddings],
+    plugins: [
+      submitUserMessage,
+      noStreamChat,
+      prepareEmbeddingText,
+      generateEmbeddings,
+    ],
   });
 
   const onSubmit = async (data: FormSchema) => {
@@ -69,18 +83,22 @@ export const ScriptForm = () => {
     //   technical_metadata: "",
     // });
 
-    const embeddingText = `${data.name} - ${data.action} - ${data.layout} - ${data.description}`;
+    const scriptContent = await fetchScriptContent(data.url);
+    const technicalMetadata = await run({ userMessage: scriptContent });
+    console.log(technicalMetadata);
 
-    const result = await run({ embeddingText });
+    // const embeddingText = `${data.name} - ${data.action} - ${data.layout} - ${data.description} - ${scriptContent}`;
 
-    if (result.status === "error") {
-      console.error("Pipeline error:", result.error);
-      return;
-    }
+    // const result = await run({ embeddingText });
 
-    console.log(result);
+    // if (result.status === "error") {
+    //   console.error("Pipeline error:", result.error);
+    //   return;
+    // }
 
-    // console.log(script);
+    // console.log(result);
+
+    // // console.log(script);
   };
 
   return (
