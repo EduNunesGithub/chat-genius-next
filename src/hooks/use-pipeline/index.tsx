@@ -24,8 +24,12 @@ export const pipelineSchema = z.object({
   error: z.string().optional(),
   messages: z
     .array(z.object({ content: z.string(), role: z.enum(roles) }))
+    .optional()
     .default([]),
-  status: z.enum(["idle", "streaming", "error"]).default("idle"),
+  status: z
+    .enum(["idle", "processing", "streaming", "loading", "error"])
+    .optional()
+    .default("idle"),
   userMessage: z.string().optional(),
 });
 
@@ -52,32 +56,31 @@ export const usePipeline = ({
         ...context,
         ...partial,
       });
-      const current: { data: PipelineSchema } = { data: merged };
-
+      let current = merged;
       const updateCtx = (next: PipelineSchema) =>
         queryClient.setQueryData(queryKey, next);
-
       for (const plugin of plugins) {
-        current.data = await plugin(current.data, updateCtx);
+        current = await plugin(current, updateCtx);
       }
-
-      return current.data;
+      return current;
     },
     onError: (err) => {
       const error = err instanceof Error ? err.message : "Unknown error";
       queryClient.setQueryData(queryKey, {
         ...context,
-        error: error,
-        status: "error",
+        error,
+        status: "error" as const,
       });
     },
-    onSuccess: (result) => queryClient.setQueryData(queryKey, result),
+    onSuccess: (result) => {
+      queryClient.setQueryData(queryKey, result);
+    },
   });
 
   return {
     context,
     isLoading: mutation.isPending,
-    queryKey: queryKey,
+    queryKey,
     run: mutation.mutateAsync,
   };
 };

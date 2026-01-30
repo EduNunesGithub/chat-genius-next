@@ -6,7 +6,7 @@ export const submitUserMessage: PipelinePlugin = (ctx, updateCtx) => {
   const updated: PipelineSchema = {
     ...ctx,
     messages: [...ctx.messages, { content: ctx.userMessage, role: "user" }],
-    status: "streaming",
+    status: "processing",
   };
 
   updateCtx(updated);

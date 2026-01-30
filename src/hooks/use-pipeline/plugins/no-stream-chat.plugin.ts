@@ -2,11 +2,11 @@ import { chat } from "@/client/api/chat.client";
 import type { PipelinePlugin, PipelineSchema } from "@/hooks/use-pipeline";
 
 export const noStreamChat: PipelinePlugin = async (ctx, updateCtx) => {
-  if (ctx.messages.length === 0) return ctx;
+  if (!ctx.messages || ctx.messages.length === 0) return ctx;
 
   updateCtx({
     ...ctx,
-    status: "streaming",
+    status: "loading",
   });
 
   try {
@@ -15,22 +15,20 @@ export const noStreamChat: PipelinePlugin = async (ctx, updateCtx) => {
       model: "gpt-4o-mini",
       stream: false,
     });
-
     const messages: PipelineSchema["messages"] = [
       ...ctx.messages,
       { content: response, role: "assistant" },
     ];
-
     return {
       ...ctx,
-      messages: messages,
+      messages,
       status: "idle",
     };
   } catch (err) {
     const error = err instanceof Error ? err.message : "Chat error";
     return {
       ...ctx,
-      error: error,
+      error,
       status: "error",
     };
   }

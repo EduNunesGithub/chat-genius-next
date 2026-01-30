@@ -11,17 +11,15 @@ export const streamChat: PipelinePlugin = async (ctx, updateCtx) => {
 
   updateCtx({
     ...ctx,
-    messages: messages,
+    messages,
     status: "streaming",
   });
 
-  const buffer = { value: "" };
-  const state: { current: PipelineSchema } = {
-    current: {
-      ...ctx,
-      messages: messages,
-      status: "streaming",
-    },
+  let buffer = "";
+  let currentState: PipelineSchema = {
+    ...ctx,
+    messages,
+    status: "streaming",
   };
 
   try {
@@ -32,33 +30,30 @@ export const streamChat: PipelinePlugin = async (ctx, updateCtx) => {
         stream: true,
       },
       (token) => {
-        buffer.value += token;
-
-        const messages = [...state.current.messages];
-        messages[messages.length - 1] = {
+        buffer += token;
+        const updatedMessages = [...currentState.messages];
+        updatedMessages[updatedMessages.length - 1] = {
+          content: buffer,
           role: "assistant",
-          content: buffer.value,
         };
-
-        state.current = {
-          ...state.current,
-          messages,
+        currentState = {
+          ...currentState,
+          messages: updatedMessages,
         };
-
-        updateCtx(state.current);
+        updateCtx(currentState);
       },
     );
 
     return {
-      ...state.current,
+      ...currentState,
       status: "idle",
       userMessage: undefined,
     };
   } catch (err) {
     const error = err instanceof Error ? err.message : "Stream error";
     return {
-      ...state.current,
-      error: error,
+      ...currentState,
+      error,
       status: "error",
     };
   }
